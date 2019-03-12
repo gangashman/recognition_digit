@@ -1,21 +1,22 @@
 import os
 import time
-import scipy
 
+import scipy
+import scipy.misc
 from mnist import MNIST
 from pybrain.datasets import SupervisedDataSet
-from pybrain.structure import LinearLayer, SigmoidLayer
+from pybrain.structure import (
+    FeedForwardNetwork, FullConnection, LinearLayer, RecurrentNetwork,
+    SigmoidLayer
+)
 from pybrain.structure.modules import SoftmaxLayer
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.tools.customxml.networkreader import NetworkReader
 from pybrain.tools.customxml.networkwriter import NetworkWriter
 from pybrain.utilities import percentError
-from pybrain.structure import FeedForwardNetwork, FullConnection
-import scipy.misc
-
 
 SIZE = 28 * 28
-HIDDEN_SIZE = 3
+HIDDEN_SIZE = 60
 OUTPUT_SIZE = 10
 
 file_path = 'save.xml'
@@ -80,24 +81,38 @@ def get_test_data():
     return resTrain, resTest
 
 
-def test(number):
+def test(start_number=0, fontsize=8):
     from matplotlib import pyplot as plt
-    result = net.activate(images[number])
-    print('Result: {}, value: {}'.format(result.argmax(), labels[number]))
+    columns = 4
+    rows = 5
+    ax = []
+    fig = plt.figure(figsize=(28, 28))
 
-    data = [images[number][28 * i: 28 * (i + 1)] for i in range(0, 28)]
+    for number in range(start_number, columns * rows):
+        result = net.activate(images[number])
+        print('Result: {}, value: {}'.format(result.argmax(), labels[number]))
 
-    fig, ax = plt.subplots()
-    textstr = '\n'.join((
-        'Result=%s' % result.argmax(),
-        'Value=%s' % labels[number],
-    ))
-    props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
-    ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=14, verticalalignment='top', bbox=props)
-    label = "Result max: {}".format(result.max())
-    ax.text(0.5, -0.1, label, size=12, ha="center", transform=ax.transAxes)
+        data = [images[number][28 * i: 28 * (i + 1)] for i in range(0, 28)]
 
-    plt.imshow(data, interpolation='nearest')
+        # fig, ax = plt.subplots()
+        ax.append(fig.add_subplot(rows, columns, number + 1))
+
+        textstr = '\n'.join((
+            'Result=%s' % result.argmax(),
+            'Value=%s' % labels[number],
+        ))
+        props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
+        ax[-1].text(
+            0.05, 0.95, textstr, transform=ax[-1].transAxes,
+            fontsize=fontsize, verticalalignment='top', bbox=props
+        )
+        label = "index: {}".format(number)
+        ax[-1].text(
+            0.5, -0.1, label, size=fontsize, ha="center",
+            transform=ax[-1].transAxes
+        )
+
+        plt.imshow(data, cmap='gray')
     plt.show()
 
 
@@ -115,7 +130,7 @@ def test_information(f):
 
 
 @test_information
-def train_epochs(epochs):
+def train_epochs(epochs=100):
     for epoch in range(0, epochs):
         start_time = time.time()
         trainer.trainEpochs(1)
