@@ -31,4 +31,5 @@ Test
 epoch: 100 	train acc: 14.77% 	test acc: 14.49%
 <div align="center"><img src="https://github.com/gangashman/recognition_digit/blob/master/screenshots/Screenshot_20190313_012706.png"/></div>
 
-
+epoch: 200 	train acc: 13.67% 	test acc: 13.17%
+<div align="center"><img src="https://github.com/gangashman/recognition_digit/blob/master/screenshots/Screenshot_20190313_025324.png"/></div>
