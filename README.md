@@ -1,5 +1,7 @@
 # recognition_digit
+Digit recognition using PyBrain Machine Learning library trained on MNIST images collection.
 
+Autor: Nikita Ivanov (Gangashman) ganagsh@gmail.com
 
 Dependencies
 -----------
@@ -26,10 +28,15 @@ pip install numpy scipy pillow
 
 Test
 -----------
+Result: network result
+Value: number on image
 ~42 seconds per epoch
 
-epoch: 100 	train acc: 14.77% 	test acc: 14.49%
+epoch: 100:
 <div align="center"><img src="https://github.com/gangashman/recognition_digit/blob/master/screenshots/Screenshot_20190313_012706.png"/></div>
 
-epoch: 200 	train acc: 13.67% 	test acc: 13.17%
+epoch: 200:
 <div align="center"><img src="https://github.com/gangashman/recognition_digit/blob/master/screenshots/Screenshot_20190313_025324.png"/></div>
+
+epoch: 400:
+<div align="center"><img src="https://github.com/gangashman/recognition_digit/blob/master/screenshots/Screenshot_20190313_053348.png"/></div>

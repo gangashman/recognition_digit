@@ -13,10 +13,9 @@ from pybrain.structure.modules import SoftmaxLayer
 from pybrain.supervised.trainers import BackpropTrainer
 from pybrain.tools.customxml.networkreader import NetworkReader
 from pybrain.tools.customxml.networkwriter import NetworkWriter
-from pybrain.utilities import percentError
 
 SIZE = 28 * 28
-HIDDEN_SIZE = 60
+HIDDEN_SIZE = 25
 OUTPUT_SIZE = 10
 
 file_path = 'save.xml'
@@ -28,13 +27,16 @@ def save(net, file_path):
 
 def load_or_create(file_path):
     if os.path.exists(file_path):
-        return NetworkReader.readFrom(file_path)
+        net = NetworkReader.readFrom(file_path)
+        print("Network loaded from: {}".format(file_path))
+        return net
     else:
+        net = RecurrentNetwork()
+
         inLayer = LinearLayer(SIZE)
         hiddenLayer = SigmoidLayer(HIDDEN_SIZE)
         outLayer = SoftmaxLayer(OUTPUT_SIZE)
 
-        net = FeedForwardNetwork()
         net.addInputModule(inLayer)
         net.addModule(hiddenLayer)
         net.addOutputModule(outLayer)
@@ -62,68 +64,61 @@ for image, label in list(zip(images, labels)):
     ds.addSample(image, values)
 
 train_ds, test_ds = ds.splitWithProportion(0.8)
-true_train = train_ds['target'].argmax(axis=1)
-true_test = test_ds['target'].argmax(axis=1)
 
 trainer = BackpropTrainer(net, train_ds, learningrate=0.1, momentum=0.1)
 
 print("Size of train_ds: {}".format(len(train_ds['target'])))
 
 
-def get_test_data():
-    outTrain = net.activateOnDataset(train_ds)
-    outTrain = outTrain.argmax(axis=1)
-    resTrain = 100 - percentError(outTrain, true_train)
-
-    outTest = net.activateOnDataset(test_ds)
-    outTest = outTest.argmax(axis=1)
-    resTest = 100 - percentError(outTest, true_test)
-    return resTrain, resTest
+def get_test_data(train_count=1000):
+    count = 0
+    for i in range(0, train_count):
+        result = net.activate(images[i])
+        if result.argmax() == labels[i]:
+            count += 1
+    return train_count / float(count)
 
 
-def test(start_number=0, fontsize=8):
+def test(start_number=0, columns=4, rows=5, fontsize=8):
     from matplotlib import pyplot as plt
-    columns = 4
-    rows = 5
     ax = []
     fig = plt.figure(figsize=(28, 28))
 
-    for number in range(start_number, columns * rows):
-        result = net.activate(images[number])
-        print('Result: {}, value: {}'.format(result.argmax(), labels[number]))
+    for number, i in enumerate(range(start_number, start_number + columns * rows)):
+        result = net.activate(images[i])
+        print('Result: {}, value: {}, {}'.format(result.argmax(), labels[i], result.round(2)))
 
-        data = [images[number][28 * i: 28 * (i + 1)] for i in range(0, 28)]
+        data = [images[i][28 * n: 28 * (n + 1)] for n in range(0, 28)]
 
         # fig, ax = plt.subplots()
         ax.append(fig.add_subplot(rows, columns, number + 1))
 
         textstr = '\n'.join((
             'Result=%s' % result.argmax(),
-            'Value=%s' % labels[number],
+            'Value=%s' % labels[i],
         ))
         props = dict(boxstyle='round', facecolor='wheat', alpha=0.5)
         ax[-1].text(
             0.05, 0.95, textstr, transform=ax[-1].transAxes,
             fontsize=fontsize, verticalalignment='top', bbox=props
         )
-        label = "index: {}".format(number)
+        label = "index: {}".format(i)
         ax[-1].text(
             0.5, -0.1, label, size=fontsize, ha="center",
             transform=ax[-1].transAxes
         )
 
         plt.imshow(data, cmap='gray')
+        plt.axis('off')
     plt.show()
 
 
 def test_information(f):
     def new_f(*args, **kwargs):
         for totalepochs, exec_time, test_data in f(*args, **kwargs):
-            resTrain, resTest = test_data
             print("".join((
                 "epoch: %3d " % totalepochs,
-                "\ttrain acc: %5.2f%% " % resTrain,
-                "\ttest acc: %5.2f%%" % resTest,
+                "\ttrain acc: %5.2f%% " % test_data,
                 "\t{:.3f} seconds".format(exec_time),
             )))
     return new_f
