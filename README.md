@@ -24,8 +24,8 @@ pip install numpy scipy pillow
 
 Test
 -----------
-Result: network result
-Value: number on image
+Result: network result<br>
+Value: number on image<br>
 
 <div align="center"><img src="https://github.com/gangashman/recognition_digit/blob/master/screenshots/Screenshot_20190720_160654.png"/></div>
 
